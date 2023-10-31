@@ -20,6 +20,14 @@ inputs:
       The private SSH key to use for cloning the private repo. For more
       details, see the README at:
         https://github.com/alnvdl-work/setup-private-repo
+  ref:
+    required: false
+    type: string
+    default: ""
+    description: |
+      The ref to be checked out. This should not be necessary most of the time.
+      For more details, see the README at:
+        https://github.com/alnvdl-work/setup-private-repo
 
 runs:
   using: composite
@@ -33,6 +41,7 @@ runs:
       repository: ${{ inputs.repository }}
       ssh-key: ${{ inputs.ssh-key }}
       path: .private-repos/${{ inputs.repository }}
+      ref: ${{ inputs.ref }}
       fetch-depth: 0
   - name: Configuring git to use the local copy of the private repo
     env:

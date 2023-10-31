@@ -3,14 +3,14 @@
 setup-private-repo is a GitHub action that Clones a private GitHub repo using
 an SSH key and configures Git to use that local copy instead.
 
-This action helps avoid the use of the too-powerful
+This action helps avoid the use of the way-too-powerful
 [personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens),
 while at the same time providing a common pattern for cloning private repos
 into a build.
 
 This action does two things:
 1. Clones private repositories fully (history of all branches and tags) to the
-   `$GITHUB_WORKSPACE/.private-repos` folder.
+   `$GITHUB_WORKSPACE/.private-repos` folder using `actions/checkout`.
 2. Configures Git with a `insteadOf` directive to use the local clone whenever
    the HTTPS URL of the private repo is referenced.
 
@@ -19,7 +19,22 @@ dependencies, as it will enable Go to find the required tag or commit from the
 cloned repo without requiring any ad-hoc hacks to go.mod or git configuration
 files.
 
-Example workflow using this action:
+## Inputs
+- `repository` (required): the full name of the GitHub repository
+  (e.g., `alnvdl-work/setup-private-repo`).
+- `ssh-key` (required): the SSH key to use for cloning. See
+  [SSH key setup](#ssh-key-setup).
+- `ref` (optional, usually inferred by `actions/checkout`): The ref to
+  checkout. You most likely don't need this. One use case for this is to
+  indicate to `actions/checkout` that you want to checkout a branch containing
+  certain commits when building pull requests for repositories that import
+  themselves as private repos (so that this action sets up the private repo
+  using a ref that is not dictated by the PR).
+
+## Outputs
+None.
+
+## Example
 ```yaml
 name: Build with a dependency on a private repo
 
@@ -42,7 +57,6 @@ jobs:
 ```
 
 ## SSH key setup
-
 Consider the following two repos:
 - `my-private-dep`: the private repo you are trying to clone for a build.
 - `my-build-repo`: the repo you are building using a GitHub Actions workflow.
