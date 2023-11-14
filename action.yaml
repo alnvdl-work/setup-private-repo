@@ -2,8 +2,8 @@ name: Setup private repo
 author: alnvdl-work
 description: |
   setup-private-repo is a GitHub action that Clones a private GitHub repo using
-  an SSH key and configures Git to use that local copy instead. See the README
-  for more details:
+  an SSH deploy key or personal access token, and configures Git to use that
+  local copy instead. See the README for more details:
     https://github.com/alnvdl-work/setup-private-repo
 
 inputs:
@@ -13,12 +13,21 @@ inputs:
     description: |
       The fully-qualified name of the GitHub repository, for example:
         alnvdl-work/setup-private-repo
-  ssh-key:
-    required: true
+  token:
+    required: false
     type: string
+    default: ""
     description: |
-      The private SSH key to use for cloning the private repo. For more
-      details, see the README at:
+      A (preferrably fine-grained) personal access token to use for cloning the
+      private repo via HTTPS. For more details, see the README at:
+        https://github.com/alnvdl-work/setup-private-repo
+  ssh-key:
+    required: false
+    type: string
+    default: ""
+    description: |
+      A private SSH key to use for cloning the private repo. For more details,
+      see the README at:
         https://github.com/alnvdl-work/setup-private-repo
   ref:
     required: false
@@ -39,6 +48,7 @@ runs:
     uses: actions/checkout@v4
     with:
       repository: ${{ inputs.repository }}
+      token: ${{ inputs.token }}
       ssh-key: ${{ inputs.ssh-key }}
       path: .private-repos/${{ inputs.repository }}
       ref: ${{ inputs.ref }}
