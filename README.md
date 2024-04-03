@@ -4,19 +4,26 @@ setup-private-repo is a GitHub action that Clones a private GitHub repository
 using an SSH key or personal access token, and configures Git to use that local
 copy instead.
 
-This action implements 3 steps:
-1. Sets ups a dedicated folder so that multiple private repos can be setup
-   simultaneously if needed (`$GITHUB_WORKSPACE/.private-repos`).
-1. Clones private repositories fully (history of all branches and tags) to the
-   `$GITHUB_WORKSPACE/.private-repos` folder using
-   [`actions/checkout`](https://github.com/actions/checkout).
-2. Configures Git with a `insteadOf` directive to use the local clone whenever
-   the HTTPS URL of the private repo is referenced.
-
 This action is most useful for building Go applications relying on private
 dependencies, as it will enable Go to find the required tag or commit from the
 cloned repo without requiring any ad-hoc hacks to go.mod or git configuration
-files.
+files. However, it is possible that it may also be useful when building code
+in other languages whose tooling relies on Git repo for downloading
+dependencies.
+
+Four steps are run:
+1. Sets ups a dedicated folder so that multiple private repos can be setup
+   simultaneously if needed (`$GITHUB_WORKSPACE/.private-repos`).
+2. Clones private repositories fully (history of all branches and tags) to the
+   `$GITHUB_WORKSPACE/.private-repos` folder using
+   [`actions/checkout`](https://github.com/actions/checkout).
+3. Creates the local tag `setup-private-repo` pointing to the checked out ref.
+   This is needed because the Go tooling only look at main branches and tags.
+   If a PR ref is being checked out and Go imports modules referencing commit
+   IDs that only exist in that same PR ref, those commits would not be found.
+   See: https://github.com/golang/go/issues/27043
+4. Configures Git with a `insteadOf` directive to use the local clone whenever
+   the HTTPS URL of the private repo is referenced.
 
 ## Inputs
 - `repository` (required): the full name of the GitHub repository
@@ -25,12 +32,6 @@ files.
   [SSH key setup](#ssh-key-setup).
 - `token`: a personal access token to use for cloning. See
   [Personal access token setup](#personal-access-token-setup).
-- `ref` (optional, usually inferred by `actions/checkout`): The ref to
-  checkout. You most likely don't need this. One use case for this is to
-  indicate to `actions/checkout` that you want to checkout a branch containing
-  certain commits when building pull requests for repositories that import
-  themselves as private repositories (so that this action sets up the private
-  repository using a ref that is not dictated by the PR).
 
 ## Outputs
 None.

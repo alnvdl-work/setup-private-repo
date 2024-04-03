@@ -29,14 +29,6 @@ inputs:
       A private SSH key to use for cloning the private repo. For more details,
       see the README at:
         https://github.com/alnvdl-work/setup-private-repo
-  ref:
-    required: false
-    type: string
-    default: ""
-    description: |
-      The ref to be checked out. This should not be necessary most of the time.
-      For more details, see the README at:
-        https://github.com/alnvdl-work/setup-private-repo
 
 runs:
   using: composite
@@ -48,11 +40,18 @@ runs:
     uses: actions/checkout@v4
     with:
       repository: ${{ inputs.repository }}
-      token: ${{ inputs.token }}
+      token: ${{ inputs.token || github.token }}
       ssh-key: ${{ inputs.ssh-key }}
       path: .private-repos/${{ inputs.repository }}
       ref: ${{ inputs.ref }}
       fetch-depth: 0
+  - name: Adding tag to enable lookups based on what was checked-out
+    env:
+      REPO: ${{ inputs.repository }}
+    run: |
+      cd $GITHUB_WORKSPACE/.private-repos/$REPO
+      git tag setup-private-repo
+    shell: bash
   - name: Configuring git to use the local copy of the private repo
     env:
       REPO: ${{ inputs.repository }}
