@@ -43,7 +43,6 @@ runs:
       token: ${{ inputs.token || github.token }}
       ssh-key: ${{ inputs.ssh-key }}
       path: .private-repos/${{ inputs.repository }}
-      ref: ${{ inputs.ref }}
       fetch-depth: 0
   - name: Adding tag to enable lookups based on what was checked-out
     env:
