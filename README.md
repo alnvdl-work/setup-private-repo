@@ -59,42 +59,9 @@ jobs:
 ```
 
 ## SSH key setup
-Consider the following two repos:
-- `my-private-dep`: the private repo you are trying to clone for a build.
-- `my-build-repo`: the repo you are building using a GitHub Actions workflow.
-
-1. Generate a key pair without a passphrase:
-   ```sh
-   ssh-keygen -N "" -C "my-private-dep" -f ~/.ssh/my-private-dep-key
-   ```
-
-2. Obtain the public key:
-   ```sh
-   cat ~/.ssh/my-private-dep-key.pub
-   ```
-
-   Then set it up as a **read-only deploy key** in `my-private-dep`. You can do
-   that in the GitHub settings for `my-private-dep`. See:
-   https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys#deploy-keys
-
-3. Obtain the private key:
-   ```sh
-   cat ~/.ssh/my-private-dep-key
-   ```
-   Then set it up as a GitHub Actions secret in `my-build-repo`. You can do
-   that in the GitHub settings for `my-build-repo`. Make sure to use an
-   unambigous name, like `MY_PRIVATE_DEP_SSH_KEY`. See:
-   https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions
-
-4. Remove the public and private keys from your machine:
-   ```sh
-   rm -rf ~/.ssh/my-private-dep-key
-   rm -rf ~/.ssh/my-private-dep-key.pub
-   ```
-
-5. In your GitHub Actions workflow in `my-build-repo`, make sure to set the
-   `ssh-key` input for `alnvdl-work/setup-private-repo@v1` with the **name** of
-   the secret you configured in step 4.
+Use the `create-ssh-keys.sh` script provided in this repository to create a
+read-only deploy key for the private repository. The script will give you
+further instructions on how to set everything up.
 
 ## Personal access token setup
 If an SSH read-only deploy key cannot be used, a fine-grained personal access
