@@ -29,12 +29,25 @@ inputs:
       A private SSH key to use for cloning the private repo. For more details,
       see the README at:
         https://github.com/alnvdl-work/setup-private-repo
+  directory:
+    required: false
+    type: string
+    default: ""
+    description: |
+      A path relative to $GITHUB_WORKSPACE under which the private repo will be
+      set up. If empty, the private repo is set up directly under
+      $GITHUB_WORKSPACE. For example, setting it to "my-project" results in the
+      private repo being cloned to:
+        $GITHUB_WORKSPACE/my-project/.private-repos/<repository>
 
 runs:
   using: composite
   steps:
   - name: Setting up folder structure
-    run: mkdir -p .private-repos/${{ inputs.repository }}
+    env:
+      REPO: ${{ inputs.repository }}
+      DIRECTORY: ${{ inputs.directory }}
+    run: mkdir -p "$GITHUB_WORKSPACE/${DIRECTORY:+$DIRECTORY/}.private-repos/$REPO"
     shell: bash
   - name: Cloning private repository
     uses: actions/checkout@v4
@@ -42,18 +55,20 @@ runs:
       repository: ${{ inputs.repository }}
       token: ${{ inputs.token || github.token }}
       ssh-key: ${{ inputs.ssh-key }}
-      path: .private-repos/${{ inputs.repository }}
+      path: ${{ inputs.directory && format('{0}/', inputs.directory) || '' }}.private-repos/${{ inputs.repository }}
       fetch-depth: 0
   - name: Adding tag to enable lookups based on what was checked-out
     env:
       REPO: ${{ inputs.repository }}
+      DIRECTORY: ${{ inputs.directory }}
     run: |
-      cd $GITHUB_WORKSPACE/.private-repos/$REPO
+      cd "$GITHUB_WORKSPACE/${DIRECTORY:+$DIRECTORY/}.private-repos/$REPO"
       git tag setup-private-repo
     shell: bash
   - name: Configuring git to use the local copy of the private repo
     env:
       REPO: ${{ inputs.repository }}
+      DIRECTORY: ${{ inputs.directory }}
     run: |
-      git config --global "url.file://$GITHUB_WORKSPACE/.private-repos/$REPO.insteadOf" "https://github.com/$REPO"
+      git config --global "url.file://$GITHUB_WORKSPACE/${DIRECTORY:+$DIRECTORY/}.private-repos/$REPO.insteadOf" "https://github.com/$REPO"
     shell: bash

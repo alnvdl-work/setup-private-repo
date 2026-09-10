@@ -13,9 +13,11 @@ dependencies.
 
 Four steps are run:
 1. Sets ups a dedicated folder so that multiple private repos can be setup
-   simultaneously if needed (`$GITHUB_WORKSPACE/.private-repos`).
+   simultaneously if needed (`$GITHUB_WORKSPACE/.private-repos`, or
+   `$GITHUB_WORKSPACE/$DIRECTORY/.private-repos` if the `directory` input is
+   set).
 2. Clones private repositories fully (history of all branches and tags) to the
-   `$GITHUB_WORKSPACE/.private-repos` folder using
+   `.private-repos` folder using
    [`actions/checkout`](https://github.com/actions/checkout).
 3. Creates the local tag `setup-private-repo` pointing to the checked out ref.
    This is needed because the Go tooling only look at main branches and tags.
@@ -32,6 +34,10 @@ Four steps are run:
   [SSH key setup](#ssh-key-setup).
 - `token`: a personal access token to use for cloning. See
   [Personal access token setup](#personal-access-token-setup).
+- `directory`: a path relative to `$GITHUB_WORKSPACE` under which the private
+  repo will be set up. If not set, the private repo is set up directly under
+  `$GITHUB_WORKSPACE`. If set to `my-project`, for example, the private repo
+  will be cloned to `$GITHUB_WORKSPACE/my-project/.private-repos/$REPO`.
 
 ## Outputs
 None.
